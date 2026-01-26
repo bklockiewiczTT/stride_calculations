@@ -156,3 +156,41 @@ def test_chunk_width_3_chunk_idx_1():
     # Assert
     assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
     assert global_idxs == expected_global_idxs, "global_idxs mismatch"
+
+
+def test_m_block_idx_1():
+    """Test read_tiles_granular with M_block_idx=1 and chunk_width=3."""
+    reset_config(GridConfig(
+        mm_block_unit_wt=2,
+        mm_blocks_per_N_block=4,
+        chunk_width=3,
+        mm_block_unit_ht=2,
+        mm_M_unit_blocks_per_core=4,
+        mm_N_blocks_per_slice=2,
+        ring_size=2,
+        N_block_idx=0,
+        M_block_idx=1,
+        slice_actual_idx=0,
+    ))
+
+    params = ReadTilesGranularParams(
+        worker_id=0,
+        start_row_in_mm=0,
+        start_chunk_col=0,
+        start_mm_M_block=0,
+        advance_by_tiles=3,
+        last_mm_M_block=3,
+        tile_granularity=4,
+        chunk_idx=0
+    )
+
+    # Execute
+    slice_idxs, global_idxs = read_tiles_granular_from_params(params)
+
+    # Reference values (list of lists, one per outer while iteration)
+    expected_slice_idxs = [[32, 35, 48, 51], [160, 163, 176, 179], [288, 291, 304, 307], [416, 419, 432, 435]]
+    expected_global_idxs = [[64, 67, 96, 99], [320, 323, 352, 355], [576, 579, 608, 611], [832, 835, 864, 867]]
+
+    # Assert
+    assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
+    assert global_idxs == expected_global_idxs, "global_idxs mismatch"
