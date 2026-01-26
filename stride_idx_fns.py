@@ -23,7 +23,7 @@ def get_effective_chunk_width_in_tiles(chunk_idx: int) -> int:
     """
     start_col = chunk_idx * config.cfg.chunk_width_in_tiles
     remaining_width = config.cfg.N_block_wt - start_col
-    print(f"remaining width: {remaining_width}")
+    # print(f"remaining width: {remaining_width}")
     return min(remaining_width, config.cfg.chunk_width_in_tiles)
 
 def read_tiles_granular_from_params(params: ReadTilesGranularParams) -> tuple[list[int], list[int]]:
@@ -80,7 +80,6 @@ def slice_coordinates_to_slice_tile_index(
     """
     Convert the slice coordinates to the tile index.
     """
-    print(f"slice_Wt: {config.cfg.slice_Wt}")
     tile_index = slice_row * config.cfg.slice_Wt + slice_col
     return tile_index
 
@@ -90,6 +89,7 @@ def slice_coordinates_to_global_tile_index(
     """
     Convert the slice coordinates to the global tile index.
     """
+    print(f"slice_col: {slice_col}, config.cfg.slice_actual_idx: {config.cfg.slice_actual_idx}, config.cfg.slice_Wt: {config.cfg.slice_Wt}")
     global_col = slice_col + config.cfg.slice_actual_idx * config.cfg.slice_Wt
     global_row = slice_row
     return global_row * config.cfg.global_Wt + global_col
@@ -199,12 +199,12 @@ def read_tiles_granular_with_direction(
             slice_row, slice_col = coordinates_to_slice_coordinates(first_row_in_mm, first_chunk_col, first_mm_M_block, config.cfg.N_block_idx, config.cfg.M_block_idx, chunk_idx, config.cfg.N_block_wt)
             # read_tile_coords(i, first_row_in_mm, first_chunk_col, first_mm_M_block)
             first_row_in_mm, first_chunk_col, first_mm_M_block = read_next_tile(first_row_in_mm, first_chunk_col, first_mm_M_block, advance_by_tiles, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
-            slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
-            global_tile_idx = slice_coordinates_to_global_tile_index(slice_row, slice_col)
 
             if oddity_bool == (direction == 0):
-                # print(f"slice_row: {slice_row}, slice_col: {slice_col}")
-                print(f"slice_tile_idx: {slice_tile_idx}, global_tile_idx: {global_tile_idx}")
+                slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
+                global_tile_idx = slice_coordinates_to_global_tile_index(slice_row, slice_col)
+                print(f"slice_row: {slice_row}, slice_col: {slice_col}") 
+                # print(f"slice_tile_idx: {slice_tile_idx}, global_tile_idx: {global_tile_idx}")
                 tiles_read += 1
                 step_slice_idxs.append(slice_tile_idx)
                 step_global_idxs.append(global_tile_idx)
@@ -383,32 +383,92 @@ if __name__ == "__main__":
 
 
     # Reset config with custom values
-    reset_config(GridConfig(
-        mm_block_unit_wt=4,
-        mm_blocks_per_N_block=2,
-        chunk_width=2,
-        mm_block_unit_ht=4,
-        mm_M_unit_blocks_per_core=2,
-        mm_N_blocks_per_slice=2,
-        ring_size=2,
-        N_block_idx=0,
-        M_block_idx=0,
-        slice_actual_idx=0,
-    ))
-    config.cfg.print_config()
+    # reset_config(GridConfig(
+    #     mm_block_unit_wt=4,
+    #     mm_blocks_per_N_block=2,
+    #     chunk_width=2,
+    #     mm_block_unit_ht=4,
+    #     mm_M_unit_blocks_per_core=2,
+    #     mm_N_blocks_per_slice=2,
+    #     ring_size=2,
+    #     N_block_idx=0,
+    #     M_block_idx=0,
+    #     slice_actual_idx=0,
+    # ))
+    # config.cfg.print_config()
 
-    params = ReadTilesGranularParams(
-        worker_id=1,
-        start_row_in_mm=0,
-        start_chunk_col=0,
-        start_mm_M_block=0,
-        advance_by_tiles=3,
-        last_mm_M_block=3,
-        tile_granularity=4,
-        direction=1,
-        chunk_idx=0
-    )
-    slice_idxs, global_idxs = read_tiles_granular_from_params_with_direction(params)
-    print(f"slice_idxs: {slice_idxs}")
-    print(f"global_idxs: {global_idxs}")
+    # params = ReadTilesGranularParams(
+    #     worker_id=1,
+    #     start_row_in_mm=0,
+    #     start_chunk_col=0,
+    #     start_mm_M_block=0,
+    #     advance_by_tiles=3,
+    #     last_mm_M_block=3,
+    #     tile_granularity=4,
+    #     direction=1,
+    #     chunk_idx=0
+    # )
+    # slice_idxs, global_idxs = read_tiles_granular_from_params_with_direction(params)
+    # print(f"slice_idxs: {slice_idxs}")
+    # print(f"global_idxs: {global_idxs}")
 
+    # reset_config(GridConfig(
+    #     mm_block_unit_wt=2,
+    #     mm_blocks_per_N_block=1,
+    #     chunk_width=1,
+    #     mm_block_unit_ht=2,
+    #     mm_M_unit_blocks_per_core=1,
+    #     mm_N_blocks_per_slice=1,
+    #     ring_size=8,
+    #     N_block_idx=0,
+    #     M_block_idx=0,
+    #     slice_actual_idx=0,
+    # ))
+    # config.cfg.print_config()
+
+    # params = ReadTilesGranularParams(
+    #     worker_id=1,
+    #     start_row_in_mm=0,
+    #     start_chunk_col=0,
+    #     start_mm_M_block=0,
+    #     advance_by_tiles=2,
+    #     last_mm_M_block=0,
+    #     tile_granularity=8,
+    #     direction=1,
+    #     chunk_idx=0
+    # )
+    # slice_idxs, global_idxs = read_tiles_granular_from_params_with_direction(params)
+    # print(f"slice_idxs: {slice_idxs}")
+    # print(f"global_idxs: {global_idxs}")
+    print("STARTING TESTING CHIP 0_______________")
+    for worker_id in [0, 1]:
+        print(f"NEXT WORKER_______________{worker_id}______________________")
+        direction = 0
+        print(f"DIRECTION_______________{direction}____________________")
+        for i in [1, 2, 3, 4, 5, 6, 7, 0]:
+            print(f"worker_id: {worker_id}, direction: {direction}, slice_actual_idx: {i}")
+            reset_config(GridConfig(
+                mm_block_unit_wt=2,
+                mm_blocks_per_N_block=1,
+                chunk_width=1,
+                mm_block_unit_ht=2,
+                mm_M_unit_blocks_per_core=1,
+                mm_N_blocks_per_slice=1,
+                ring_size=8,
+                N_block_idx=0,
+                M_block_idx=0,
+                slice_actual_idx=i,
+            ))
+            params = ReadTilesGranularParams(
+                worker_id=worker_id,
+                start_row_in_mm=0,
+                start_chunk_col=0,
+                start_mm_M_block=0,
+                advance_by_tiles=2,
+                last_mm_M_block=0,
+                tile_granularity=8,
+                direction=direction,
+                chunk_idx=0
+            )
+            slice_idxs, global_idxs = read_tiles_granular_from_params_with_direction(params)
+            print(f"global_idxs: {global_idxs}")
