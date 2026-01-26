@@ -1,0 +1,42 @@
+import config
+from config import GridConfig, reset_config
+from stride_idx_fns import ReadTilesGranularParams, read_tiles_granular_from_params
+
+
+def test_basic_configuration():
+    """Test read_tiles_granular with configuration from stride_idx_fns.py lines 202-225."""
+    # Reset config with custom values (from lines 202-214)
+    reset_config(GridConfig(
+        mm_block_unit_wt=2,
+        mm_blocks_per_N_block=4,
+        chunk_width=2,
+        mm_block_unit_ht=2,
+        mm_M_unit_blocks_per_core=4,
+        mm_N_blocks_per_slice=2,
+        ring_size=2,
+        N_block_idx=0,
+        M_block_idx=0,
+        slice_actual_idx=0,
+    ))
+
+    # Create params (from lines 217-225)
+    params = ReadTilesGranularParams(
+        worker_id=0,
+        start_row_in_mm=0,
+        start_chunk_col=0,
+        start_mm_M_block=0,
+        advance_by_tiles=2,
+        last_mm_M_block=3,
+        tile_granularity=4
+    )
+
+    # Execute
+    slice_idxs, global_idxs = read_tiles_granular_from_params(params)
+
+    # Reference values
+    expected_slice_idxs = [0, 2, 16, 18, 128, 130, 144, 146, 256, 258, 272, 274, 384, 386, 400, 402]
+    expected_global_idxs = [0, 2, 32, 34, 256, 258, 288, 290, 512, 514, 544, 546, 768, 770, 800, 802]
+
+    # Assert
+    assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
+    assert global_idxs == expected_global_idxs, "global_idxs mismatch"
