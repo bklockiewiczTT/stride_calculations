@@ -33,9 +33,9 @@ def test_basic_configuration():
     # Execute
     slice_idxs, global_idxs = read_tiles_granular_from_params(params)
 
-    # Reference values
-    expected_slice_idxs = [0, 2, 16, 18, 128, 130, 144, 146, 256, 258, 272, 274, 384, 386, 400, 402]
-    expected_global_idxs = [0, 2, 32, 34, 256, 258, 288, 290, 512, 514, 544, 546, 768, 770, 800, 802]
+    # Reference values (list of lists, one per outer while iteration)
+    expected_slice_idxs = [[0, 2, 16, 18], [128, 130, 144, 146], [256, 258, 272, 274], [384, 386, 400, 402]]
+    expected_global_idxs = [[0, 2, 32, 34], [256, 258, 288, 290], [512, 514, 544, 546], [768, 770, 800, 802]]
 
     # Assert
     assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
@@ -73,9 +73,9 @@ def test_with_direction_backward():
     # Execute
     slice_idxs, global_idxs = read_tiles_granular_from_params_with_direction(params)
 
-    # Reference values
-    expected_slice_idxs = [3, 19, 131, 147, 259, 275, 387, 403]
-    expected_global_idxs = [3, 35, 259, 291, 515, 547, 771, 803]
+    # Reference values (list of lists, one per outer while iteration)
+    expected_slice_idxs = [[3, 19, 131, 147], [259, 275, 387, 403]]
+    expected_global_idxs = [[3, 35, 259, 291], [515, 547, 771, 803]]
 
     # Assert
     assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
