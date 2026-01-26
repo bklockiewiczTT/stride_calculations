@@ -1,20 +1,13 @@
-
-mm_block_unit_ht = 2
-mm_block_unit_wt = 2
-chunk_width = 2
-chunk_width_in_tiles = chunk_width * mm_block_unit_wt
-chunk_piece_size = mm_block_unit_ht * chunk_width_in_tiles
-
-
-print(f"chunk_piece_size: {chunk_piece_size}")
-
 # chunk is a 2D array of 1 x chunk_width units so mm_block_unit_ht by chunk_width * mm_block_unit_wt tiles
 
 def read_next_tile(
     row_in_mm: int,
     chunk_col: int,
     mm_M_block: int,
-    advance_by_tiles: int) -> tuple[int, int, int]:
+    advance_by_tiles: int,
+    chunk_piece_size: int,
+    chunk_width_in_tiles: int,
+    mm_block_unit_ht: int) -> tuple[int, int, int]:
     """
     Read the next tile from the chunk.
     """
@@ -57,7 +50,9 @@ def how_many_tiles_to_read_formula(
     chunk_col: int,
     mm_M_block: int,
     advance_by_tiles: int,
-    last_mm_M_block: int):
+    last_mm_M_block: int,
+    chunk_piece_size: int,
+    chunk_width_in_tiles: int):
     
     current_block_tiles_remaining = chunk_piece_size - (row_in_mm * chunk_width_in_tiles + chunk_col) - 1
     future_blocks_tiles = (last_mm_M_block - mm_M_block) * chunk_piece_size
@@ -71,7 +66,10 @@ def read_tiles_granular(
     start_mm_M_block: int,
     advance_by_tiles: int,
     last_mm_M_block: int,
-    tile_granularity: int
+    tile_granularity: int,
+    chunk_piece_size: int,
+    chunk_width_in_tiles: int,
+    mm_block_unit_ht: int
     ):
     """
     Read the tiles granularly.
@@ -83,10 +81,10 @@ def read_tiles_granular(
     if last_mm_M_block < start_mm_M_block:
         raise ValueError("last_mm_M_block must be greater than or equal to start_mm_M_block")
 
-    first_row_in_mm, first_chunk_col, first_mm_M_block = read_next_tile(start_row_in_mm, start_chunk_col, start_mm_M_block, worker_id)
+    first_row_in_mm, first_chunk_col, first_mm_M_block = read_next_tile(start_row_in_mm, start_chunk_col, start_mm_M_block, worker_id, chunk_piece_size, chunk_width_in_tiles, mm_block_unit_ht)
     if first_mm_M_block > last_mm_M_block:
         return
-    tiles_to_read = how_many_tiles_to_read_formula(first_row_in_mm, first_chunk_col, first_mm_M_block, advance_by_tiles, last_mm_M_block)
+    tiles_to_read = how_many_tiles_to_read_formula(first_row_in_mm, first_chunk_col, first_mm_M_block, advance_by_tiles, last_mm_M_block, chunk_piece_size, chunk_width_in_tiles)
     while tiles_to_read > 0:
         print(f"--------------------------------")
         print(f"tiles_to_read: {tiles_to_read}")
@@ -94,7 +92,7 @@ def read_tiles_granular(
         tiles_to_read -= tiles_to_read_in_this_step
         for i in range(tiles_to_read_in_this_step):
             read_tile_coords(i, first_row_in_mm, first_chunk_col, first_mm_M_block)
-            first_row_in_mm, first_chunk_col, first_mm_M_block = read_next_tile(first_row_in_mm, first_chunk_col, first_mm_M_block, advance_by_tiles)
+            first_row_in_mm, first_chunk_col, first_mm_M_block = read_next_tile(first_row_in_mm, first_chunk_col, first_mm_M_block, advance_by_tiles, chunk_piece_size, chunk_width_in_tiles, mm_block_unit_ht)
 
 def read_tile_coords(
     i : int,
@@ -115,9 +113,16 @@ if __name__ == "__main__":
     advance_by_tiles = 2
     tile_granularity = 8
 
+    # Config values
+    mm_block_unit_ht = 2
+    mm_block_unit_wt = 2
+    chunk_width = 2
+    chunk_width_in_tiles = chunk_width * mm_block_unit_wt
+    chunk_piece_size = mm_block_unit_ht * chunk_width_in_tiles
+
     assert worker_id < advance_by_tiles
 
-    read_tiles_granular(worker_id, row_in_mm, chunk_col, mm_M_block, advance_by_tiles, last_mm_M_block, tile_granularity)
+    read_tiles_granular(worker_id, row_in_mm, chunk_col, mm_M_block, advance_by_tiles, last_mm_M_block, tile_granularity, chunk_piece_size, chunk_width_in_tiles, mm_block_unit_ht)
 
 
 
