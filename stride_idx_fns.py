@@ -242,32 +242,32 @@ if __name__ == "__main__":
     # print(f"slice_idxs: {slice_idxs}")
     # print(f"global_idxs: {global_idxs}")
 
-    reset_config(GridConfig(
-        mm_block_unit_wt=2,
-        mm_blocks_per_N_block=4,
-        chunk_width=2,
-        mm_block_unit_ht=2,
-        mm_M_unit_blocks_per_core=4,
-        mm_N_blocks_per_slice=2,
-        ring_size=2,
-        N_block_idx=0,
-        M_block_idx=0,
-        slice_actual_idx=1,
-    ))
-    config.cfg.print_config()
-    params = ReadTilesGranularParams(
-        worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
-        start_mm_M_block=0,
-        advance_by_tiles=3,
-        last_mm_M_block=2,
-        tile_granularity=5,
-        chunk_idx=0
-    )
-    slice_idxs, global_idxs = read_tiles_granular_from_params(params)
-    print(f"slice_idxs: {slice_idxs}")
-    print(f"global_idxs: {global_idxs}")
+    # reset_config(GridConfig(
+    #     mm_block_unit_wt=2,
+    #     mm_blocks_per_N_block=4,
+    #     chunk_width=2,
+    #     mm_block_unit_ht=2,
+    #     mm_M_unit_blocks_per_core=4,
+    #     mm_N_blocks_per_slice=2,
+    #     ring_size=2,
+    #     N_block_idx=0,
+    #     M_block_idx=0,
+    #     slice_actual_idx=1,
+    # ))
+    # config.cfg.print_config()
+    # params = ReadTilesGranularParams(
+    #     worker_id=0,
+    #     start_row_in_mm=0,
+    #     start_chunk_col=0,
+    #     start_mm_M_block=0,
+    #     advance_by_tiles=3,
+    #     last_mm_M_block=2,
+    #     tile_granularity=5,
+    #     chunk_idx=0
+    # )
+    # slice_idxs, global_idxs = read_tiles_granular_from_params(params)
+    # print(f"slice_idxs: {slice_idxs}")
+    # print(f"global_idxs: {global_idxs}")
 
     # reset_config(GridConfig(
     #     mm_block_unit_wt=2,
@@ -292,13 +292,15 @@ if __name__ == "__main__":
     #     tile_granularity=5,
     #     chunk_idx=1
     # )
-    # read_tiles_granular_from_params(params)
+    # slice_idxs, global_idxs = read_tiles_granular_from_params(params)
+    # print(f"slice_idxs: {slice_idxs}")
+    # print(f"global_idxs: {global_idxs}")
 
 
     # reset_config(GridConfig(
     #     mm_block_unit_wt=2,
     #     mm_blocks_per_N_block=4,
-    #     chunk_width=2,
+    #     chunk_width=3,
     #     mm_block_unit_ht=2,
     #     mm_M_unit_blocks_per_core=4,
     #     mm_N_blocks_per_slice=2,
@@ -312,13 +314,42 @@ if __name__ == "__main__":
     #     worker_id=0,
     #     start_row_in_mm=0,
     #     start_chunk_col=0,
-    #     start_mm_M_block=1,
-    #     advance_by_tiles=2,
+    #     start_mm_M_block=0,
+    #     advance_by_tiles=3,
     #     last_mm_M_block=3,
-    #     tile_granularity=5,
-    #     chunk_idx=1
+    #     tile_granularity=4,
+    #     chunk_idx=0
     # )
-    # read_tiles_granular_from_params(params)
+    # slice_idxs, global_idxs = read_tiles_granular_from_params(params)
+    # print(f"slice_idxs: {slice_idxs}")
+    # print(f"global_idxs: {global_idxs}")
+
+    reset_config(GridConfig(
+        mm_block_unit_wt=2,
+        mm_blocks_per_N_block=4,
+        chunk_width=2,
+        mm_block_unit_ht=2,
+        mm_M_unit_blocks_per_core=4,
+        mm_N_blocks_per_slice=2,
+        ring_size=2,
+        N_block_idx=1,
+        M_block_idx=2,
+        slice_actual_idx=0,
+    ))
+    config.cfg.print_config()
+    params = ReadTilesGranularParams(
+        worker_id=0,
+        start_row_in_mm=0,
+        start_chunk_col=0,
+        start_mm_M_block=0,
+        advance_by_tiles=3,
+        last_mm_M_block=3,
+        tile_granularity=5,
+        chunk_idx=1
+    )
+    slice_idxs, global_idxs = read_tiles_granular_from_params(params)
+    print(f"slice_idxs: {slice_idxs}")
+    print(f"global_idxs: {global_idxs}")
 
     # Reset config with custom values
     # reset_config(GridConfig(
