@@ -352,3 +352,42 @@ def test_direction_based_on_num_workers():
     # Assert
     assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
     assert global_idxs == expected_global_idxs, "global_idxs mismatch"
+
+
+def test_direction_based_on_num_workers_3():
+    """Test read_tiles_granular_with_direction_based_on_num_workers with num_workers=3 and different block dimensions."""
+    reset_config(GridConfig(
+        mm_block_unit_wt=4,
+        mm_blocks_per_N_block=2,
+        chunk_width=2,
+        mm_block_unit_ht=4,
+        mm_M_unit_blocks_per_core=2,
+        mm_N_blocks_per_slice=2,
+        ring_size=2,
+        N_block_idx=0,
+        M_block_idx=0,
+        slice_actual_idx=0,
+    ))
+
+    params = ReadTilesGranularParams(
+        worker_id=1,
+        start_row_in_mm=0,
+        start_chunk_col=0,
+        start_mm_M_block=0,
+        last_mm_M_block=3,
+        tile_granularity=4,
+        direction=1,
+        chunk_idx=0,
+        num_workers=3
+    )
+
+    # Execute
+    slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers_from_params(params)
+
+    # Reference values (list of lists, one per outer while iteration)
+    expected_slice_idxs = [[4, 18, 32, 38], [52, 130, 144, 150], [164, 178, 256, 262], [276, 290, 304, 310], [388, 402, 416, 422], [436]]
+    expected_global_idxs = [[4, 34, 64, 70], [100, 258, 288, 294], [324, 354, 512, 518], [548, 578, 608, 614], [772, 802, 832, 838], [868]]
+
+    # Assert
+    assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
+    assert global_idxs == expected_global_idxs, "global_idxs mismatch"
