@@ -14,7 +14,7 @@ def test_basic_configuration():
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -53,7 +53,7 @@ def test_with_direction_backward():
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -92,7 +92,7 @@ def test_slice_actual_idx_1():
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -126,11 +126,11 @@ def test_slice_actual_idx_1():
 
 
 def test_chunk_width_3_chunk_idx_1():
-    """Test read_tiles_granular with chunk_width=3 and chunk_idx=1."""
+    """Test read_tiles_granular with chunk_width_in_mm_units=3 and chunk_idx=1."""
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=3,
+        chunk_width_in_mm_units=3,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -164,11 +164,11 @@ def test_chunk_width_3_chunk_idx_1():
 
 
 def test_m_block_idx_1():
-    """Test read_tiles_granular with M_block_idx=1 and chunk_width=3."""
+    """Test read_tiles_granular with M_block_idx=1 and chunk_width_in_mm_units=3."""
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=3,
+        chunk_width_in_mm_units=3,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -206,7 +206,7 @@ def test_n_block_idx_1_m_block_idx_2():
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -244,7 +244,7 @@ def test_with_direction_forward():
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -282,7 +282,7 @@ def test_different_block_dimensions():
     reset_config(GridConfig(
         mm_block_unit_wt=4,
         mm_blocks_per_N_block=2,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=4,
         mm_M_unit_blocks_per_core=2,
         mm_N_blocks_per_slice=2,
@@ -321,7 +321,7 @@ def test_direction_based_on_num_workers():
     reset_config(GridConfig(
         mm_block_unit_wt=2,
         mm_blocks_per_N_block=4,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=2,
         mm_M_unit_blocks_per_core=4,
         mm_N_blocks_per_slice=2,
@@ -359,7 +359,7 @@ def test_direction_based_on_num_workers_3():
     reset_config(GridConfig(
         mm_block_unit_wt=4,
         mm_blocks_per_N_block=2,
-        chunk_width=2,
+        chunk_width_in_mm_units=2,
         mm_block_unit_ht=4,
         mm_M_unit_blocks_per_core=2,
         mm_N_blocks_per_slice=2,

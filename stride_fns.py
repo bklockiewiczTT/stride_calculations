@@ -1,5 +1,5 @@
-# chunk is a 2D array of 1 x chunk_width units
-# so mm_block_unit_ht by chunk_width * mm_block_unit_wt tiles
+# chunk is a 2D array of 1 x chunk_width_in_mm_units units
+# so mm_block_unit_ht by chunk_width_in_mm_units * mm_block_unit_wt tiles
 
 def read_next_tile(
     row_in_mm_M_block: int,
@@ -167,8 +167,8 @@ if __name__ == "__main__":
     # Config values
     mm_block_unit_ht = 2
     mm_block_unit_wt = 2
-    chunk_width = 2
-    chunk_width_in_tiles = chunk_width * mm_block_unit_wt
+    chunk_width_in_mm_units = 2
+    chunk_width_in_tiles = chunk_width_in_mm_units * mm_block_unit_wt
     chunk_piece_size = mm_block_unit_ht * chunk_width_in_tiles
 
     assert worker_id < advance_by_tiles

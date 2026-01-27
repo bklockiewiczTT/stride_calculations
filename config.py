@@ -6,13 +6,13 @@ class GridConfig:
     # Primary config values
     mm_block_unit_wt: int = 2
     mm_blocks_per_N_block: int = 4
-    chunk_width: int = 3
+    chunk_width_in_mm_units: int = 3
     mm_block_unit_ht: int = 2
     mm_M_unit_blocks_per_core: int = 4
     mm_N_blocks_per_slice: int = 2
     ring_size: int = 2
-    N_block_idx: int = 0 # index of the full N-block within the slice
-    M_block_idx: int = 0 # index of the mm M-block within the core
+    N_block_idx: int = 0 # index of the full N-block within a single slice
+    M_block_idx: int = 0 # index of the mm M-block within a single core
     slice_actual_idx: int = 0
 
     # Derived values (computed in __post_init__)
@@ -33,7 +33,7 @@ class GridConfig:
         self.slice_Wt = self.N_block_wt * self.mm_N_blocks_per_slice
         
         self.tiles_ht_per_core = self.mm_block_unit_ht * self.mm_M_unit_blocks_per_core
-        self.chunk_width_in_tiles = self.chunk_width * self.mm_block_unit_wt
+        self.chunk_width_in_tiles = self.chunk_width_in_mm_units * self.mm_block_unit_wt
         self.chunk_piece_size = self.mm_block_unit_ht * self.chunk_width_in_tiles
         self.global_Wt = self.slice_Wt * self.ring_size
 
