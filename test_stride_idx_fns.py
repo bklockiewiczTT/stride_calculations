@@ -29,9 +29,9 @@ def test_basic_configuration():
         worker_id=0,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=2,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=4
     )
 
@@ -68,9 +68,9 @@ def test_with_direction_backward():
         worker_id=1,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=2,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=4,
         direction=1
     )
@@ -106,9 +106,9 @@ def test_slice_actual_idx_1():
         worker_id=0,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=3,
-        last_mm_M_block=2,
+        last_mm_core_idx=2,
         tile_granularity=5,
         chunk_idx=0
     )
@@ -144,9 +144,9 @@ def test_chunk_width_3_chunk_idx_1():
         worker_id=1,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=2,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=5,
         chunk_idx=1
     )
@@ -182,9 +182,9 @@ def test_m_block_idx_1():
         worker_id=0,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=3,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=4,
         chunk_idx=0
     )
@@ -220,9 +220,9 @@ def test_n_block_idx_1_m_block_idx_2():
         worker_id=0,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=3,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=5,
         chunk_idx=1
     )
@@ -258,9 +258,9 @@ def test_with_direction_forward():
         worker_id=0,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=2,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=5,
         direction=0
     )
@@ -296,9 +296,9 @@ def test_different_block_dimensions():
         worker_id=1,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
+        start_mm_core_idx=0,
         advance_by_tiles=3,
-        last_mm_M_block=3,
+        last_mm_core_idx=3,
         tile_granularity=4,
         direction=1,
         chunk_idx=0
@@ -335,8 +335,8 @@ def test_direction_based_on_num_workers():
         worker_id=0,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
-        last_mm_M_block=3,
+        start_mm_core_idx=0,
+        last_mm_core_idx=3,
         tile_granularity=4,
         direction=0,
         num_workers=2
@@ -373,8 +373,8 @@ def test_direction_based_on_num_workers_3():
         worker_id=1,
         start_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
-        start_mm_M_block=0,
-        last_mm_M_block=3,
+        start_mm_core_idx=0,
+        last_mm_core_idx=3,
         tile_granularity=4,
         direction=1,
         chunk_idx=0,
