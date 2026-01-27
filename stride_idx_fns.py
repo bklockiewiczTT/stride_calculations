@@ -14,7 +14,7 @@ class ReadTilesGranularParams:
     last_mm_core_idx: int = 3
     tile_granularity: int = 8
     chunk_idx: int = 0
-    direction: bool = True
+    direction: int = 1
     num_workers: int = 2
 
 def get_effective_chunk_width_in_tiles(chunk_idx: int) -> int:
@@ -86,8 +86,8 @@ def coordinates_to_slice_coordinates(
     Convert the coordinates to the slice tile index.
     """
     rows_before_this_core = mm_core_idx * config.cfg.tiles_ht_per_core
-    rows_before_slice = M_block_idx * config.cfg.mm_block_unit_ht
-    slice_row = rows_before_this_core + rows_before_slice + row_in_mm_M_block
+    rows_before_piece = M_block_idx * config.cfg.mm_block_unit_ht
+    slice_row = rows_before_this_core + rows_before_piece + row_in_mm_M_block
     slice_col = N_block_idx * N_block_wt + chunk_idx * config.cfg.chunk_width_in_tiles + chunk_col_in_tiles
     return slice_row, slice_col
 
