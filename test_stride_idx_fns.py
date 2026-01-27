@@ -27,8 +27,8 @@ def test_basic_configuration():
     # Create params (from lines 217-225)
     params = ReadTilesGranularParams(
         worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=2,
         last_mm_M_block=3,
@@ -66,8 +66,8 @@ def test_with_direction_backward():
     # Create params (from lines 354-363)
     params = ReadTilesGranularParams(
         worker_id=1,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=2,
         last_mm_M_block=3,
@@ -104,8 +104,8 @@ def test_slice_actual_idx_1():
 
     params = ReadTilesGranularParams(
         worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=3,
         last_mm_M_block=2,
@@ -142,8 +142,8 @@ def test_chunk_width_3_chunk_idx_1():
 
     params = ReadTilesGranularParams(
         worker_id=1,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=2,
         last_mm_M_block=3,
@@ -180,8 +180,8 @@ def test_m_block_idx_1():
 
     params = ReadTilesGranularParams(
         worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=3,
         last_mm_M_block=3,
@@ -218,8 +218,8 @@ def test_n_block_idx_1_m_block_idx_2():
 
     params = ReadTilesGranularParams(
         worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=3,
         last_mm_M_block=3,
@@ -256,8 +256,8 @@ def test_with_direction_forward():
 
     params = ReadTilesGranularParams(
         worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=2,
         last_mm_M_block=3,
@@ -294,8 +294,8 @@ def test_different_block_dimensions():
 
     params = ReadTilesGranularParams(
         worker_id=1,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         advance_by_tiles=3,
         last_mm_M_block=3,
@@ -333,8 +333,8 @@ def test_direction_based_on_num_workers():
 
     params = ReadTilesGranularParams(
         worker_id=0,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         last_mm_M_block=3,
         tile_granularity=4,
@@ -371,8 +371,8 @@ def test_direction_based_on_num_workers_3():
 
     params = ReadTilesGranularParams(
         worker_id=1,
-        start_row_in_mm=0,
-        start_chunk_col=0,
+        start_row_in_mm_M_block=0,
+        start_chunk_col_in_tiles=0,
         start_mm_M_block=0,
         last_mm_M_block=3,
         tile_granularity=4,
