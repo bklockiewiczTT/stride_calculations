@@ -27,7 +27,9 @@ def get_effective_chunk_width_in_tiles(chunk_idx: int) -> int:
     # print(f"remaining width: {remaining_width}")
     return min(remaining_width, config.cfg.chunk_width_in_tiles)
 
-def read_tiles_granular_from_params(params: ReadTilesGranularParams) -> tuple[list[int], list[int]]:
+def read_tiles_granular_from_params(
+    params: ReadTilesGranularParams
+) -> tuple[list[int], list[int]]:
     """
     Call read_tiles_granular using parameters from a ReadTilesGranularParams instance.
     """
@@ -42,7 +44,9 @@ def read_tiles_granular_from_params(params: ReadTilesGranularParams) -> tuple[li
         chunk_idx=params.chunk_idx
     )
 
-def read_tiles_granular_from_params_with_direction(params: ReadTilesGranularParams) -> tuple[list[int], list[int]]:
+def read_tiles_granular_from_params_with_direction(
+    params: ReadTilesGranularParams
+) -> tuple[list[int], list[int]]:
     """
     Call read_tiles_granular using parameters from a ReadTilesGranularParams instance.
     """
@@ -58,7 +62,9 @@ def read_tiles_granular_from_params_with_direction(params: ReadTilesGranularPara
         direction=params.direction
     )
 
-def read_tiles_granular_with_direction_based_on_num_workers_from_params(params: ReadTilesGranularParams) -> tuple[list[list[int]], list[list[int]]]:
+def read_tiles_granular_with_direction_based_on_num_workers_from_params(
+    params: ReadTilesGranularParams
+) -> tuple[list[list[int]], list[list[int]]]:
     """
     Call read_tiles_granular_with_direction_based_on_num_workers using parameters from a ReadTilesGranularParams instance.
     """
@@ -88,7 +94,9 @@ def coordinates_to_slice_coordinates(
     rows_before_this_core = mm_core_idx * config.cfg.tiles_ht_per_core
     rows_before_piece = M_block_idx * config.cfg.mm_block_unit_ht
     slice_row = rows_before_this_core + rows_before_piece + tile_row_in_mm_M_block
-    slice_col = N_block_idx * N_block_wt + chunk_idx * config.cfg.chunk_width_in_tiles + chunk_col_in_tiles
+    slice_col = (N_block_idx * N_block_wt +
+                 chunk_idx * config.cfg.chunk_width_in_tiles +
+                 chunk_col_in_tiles)
     return slice_row, slice_col
 
 def slice_coordinates_to_slice_tile_index(
@@ -106,7 +114,8 @@ def slice_coordinates_to_global_tile_index(
     """
     Convert the slice coordinates to the global tile index.
     """
-    # print(f"slice_col: {slice_col}, config.cfg.slice_actual_idx: {config.cfg.slice_actual_idx}, config.cfg.slice_Wt: {config.cfg.slice_Wt}")
+    # print(f"slice_col: {slice_col}, slice_actual_idx: {config.cfg.slice_actual_idx}, "
+    #       f"slice_Wt: {config.cfg.slice_Wt}")
     global_col = slice_col + config.cfg.slice_actual_idx * config.cfg.slice_Wt
     global_row = slice_row
     return global_row * config.cfg.global_Wt + global_col
@@ -130,19 +139,32 @@ def read_tiles_granular(
     if advance_by_tiles <= 0:
         raise ValueError("advance_by_tiles must be greater than 0")
     if last_mm_core_idx < start_mm_core_idx:
-        raise ValueError("last_mm_core_idx must be greater than or equal to start_mm_core_idx")
+        raise ValueError(
+            "last_mm_core_idx must be greater than or equal to start_mm_core_idx"
+        )
     
     slice_idxs = []
     global_idxs = []
 
     # Compute effective chunk dimensions for stride_fns
     effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles(chunk_idx)
-    effective_chunk_piece_size = config.cfg.mm_block_unit_ht * effective_chunk_width_in_tiles
+    effective_chunk_piece_size = (config.cfg.mm_block_unit_ht *
+                                  effective_chunk_width_in_tiles)
 
-    first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx = read_next_tile(start_tile_row_in_mm_M_block, start_chunk_col_in_tiles, start_mm_core_idx, worker_id, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
+    (first_tile_row_in_mm_M_block,
+     first_chunk_col_in_tiles,
+     first_mm_core_idx) = read_next_tile(
+        start_tile_row_in_mm_M_block, start_chunk_col_in_tiles, start_mm_core_idx,
+        worker_id, effective_chunk_piece_size, effective_chunk_width_in_tiles,
+        config.cfg.mm_block_unit_ht
+    )
     if first_mm_core_idx > last_mm_core_idx:
         return [], []
-    tiles_to_read = how_many_tiles_to_read_formula(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, advance_by_tiles, last_mm_core_idx, effective_chunk_piece_size, effective_chunk_width_in_tiles)
+    tiles_to_read = how_many_tiles_to_read_formula(
+        first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx,
+        advance_by_tiles, last_mm_core_idx,
+        effective_chunk_piece_size, effective_chunk_width_in_tiles
+    )
     while tiles_to_read > 0:
         print(f"--------------------------------")
         print(f"tiles_to_read: {tiles_to_read}")
@@ -151,10 +173,21 @@ def read_tiles_granular(
         step_slice_idxs = []
         step_global_idxs = []
         for i in range(tiles_to_read_in_this_step):
-            slice_row, slice_col = coordinates_to_slice_coordinates(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx, chunk_idx, config.cfg.N_block_wt)
-            # read_tile_coords(i, first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx)
+            slice_row, slice_col = coordinates_to_slice_coordinates(
+                first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
+                first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx,
+                chunk_idx, config.cfg.N_block_wt
+            )
+            # read_tile_coords(i, first_tile_row_in_mm_M_block,
+            #                  first_chunk_col_in_tiles, first_mm_core_idx)
             # print(f"slice_row: {slice_row}, slice_col: {slice_col}")
-            first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx = read_next_tile(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, advance_by_tiles, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
+            (first_tile_row_in_mm_M_block,
+             first_chunk_col_in_tiles,
+             first_mm_core_idx) = read_next_tile(
+                first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
+                first_mm_core_idx, advance_by_tiles, effective_chunk_piece_size,
+                effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht
+            )
             slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
             global_tile_idx = slice_coordinates_to_global_tile_index(slice_row, slice_col)
             step_slice_idxs.append(slice_tile_idx)
@@ -184,18 +217,31 @@ def read_tiles_granular_with_direction(
     if advance_by_tiles <= 0:
         raise ValueError("advance_by_tiles must be greater than 0")
     if last_mm_core_idx < start_mm_core_idx:
-        raise ValueError("last_mm_core_idx must be greater than or equal to start_mm_core_idx")
+        raise ValueError(
+            "last_mm_core_idx must be greater than or equal to start_mm_core_idx"
+        )
 
     # Compute effective chunk dimensions for stride_fns
     effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles(chunk_idx)
-    effective_chunk_piece_size = config.cfg.mm_block_unit_ht * effective_chunk_width_in_tiles
+    effective_chunk_piece_size = (config.cfg.mm_block_unit_ht *
+                                  effective_chunk_width_in_tiles)
     slice_idxs = []
     global_idxs = []
 
-    first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx = read_next_tile(start_tile_row_in_mm_M_block, start_chunk_col_in_tiles, start_mm_core_idx, worker_id, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
+    (first_tile_row_in_mm_M_block,
+     first_chunk_col_in_tiles,
+     first_mm_core_idx) = read_next_tile(
+        start_tile_row_in_mm_M_block, start_chunk_col_in_tiles, start_mm_core_idx,
+        worker_id, effective_chunk_piece_size, effective_chunk_width_in_tiles,
+        config.cfg.mm_block_unit_ht
+    )
     if first_mm_core_idx > last_mm_core_idx:
         return slice_idxs, global_idxs
-    tiles_to_read = how_many_tiles_to_read_formula(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, advance_by_tiles, last_mm_core_idx, effective_chunk_piece_size, effective_chunk_width_in_tiles)
+    tiles_to_read = how_many_tiles_to_read_formula(
+        first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx,
+        advance_by_tiles, last_mm_core_idx,
+        effective_chunk_piece_size, effective_chunk_width_in_tiles
+    )
     
     tiles_to_read_forward = (tiles_to_read + 1) // 2
     tiles_to_read_backward = tiles_to_read - tiles_to_read_forward
@@ -213,9 +259,20 @@ def read_tiles_granular_with_direction(
             # print(f"oddity_bool: {oddity_bool}")
             # print(f"direction: {direction}")
             # print(f"reading tile")
-            slice_row, slice_col = coordinates_to_slice_coordinates(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx, chunk_idx, config.cfg.N_block_wt)
-            # read_tile_coords(i, first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx)
-            first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx = read_next_tile(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, advance_by_tiles, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
+            slice_row, slice_col = coordinates_to_slice_coordinates(
+                first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
+                first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx,
+                chunk_idx, config.cfg.N_block_wt
+            )
+            # read_tile_coords(i, first_tile_row_in_mm_M_block,
+            #                  first_chunk_col_in_tiles, first_mm_core_idx)
+            (first_tile_row_in_mm_M_block,
+             first_chunk_col_in_tiles,
+             first_mm_core_idx) = read_next_tile(
+                first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
+                first_mm_core_idx, advance_by_tiles, effective_chunk_piece_size,
+                effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht
+            )
 
             if oddity_bool == (direction == 0):
                 slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
@@ -249,7 +306,9 @@ def read_tiles_granular_with_direction_based_on_num_workers(
     if tile_granularity <= 0:
         raise ValueError("tile_granularity must be greater than 0")
     if last_mm_core_idx < start_mm_core_idx:
-        raise ValueError("last_mm_core_idx must be greater than or equal to start_mm_core_idx")
+        raise ValueError(
+            "last_mm_core_idx must be greater than or equal to start_mm_core_idx"
+        )
     if num_workers <= 0:
         raise ValueError("num_workers must be greater than 0")
     if direction not in [0, 1]:
@@ -263,12 +322,23 @@ def read_tiles_granular_with_direction_based_on_num_workers(
 
     # Compute effective chunk dimensions for stride_fns
     effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles(chunk_idx)
-    effective_chunk_piece_size = config.cfg.mm_block_unit_ht * effective_chunk_width_in_tiles
+    effective_chunk_piece_size = (config.cfg.mm_block_unit_ht *
+                                  effective_chunk_width_in_tiles)
 
-    first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx = read_next_tile(start_tile_row_in_mm_M_block, start_chunk_col_in_tiles, start_mm_core_idx, effective_id, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
+    (first_tile_row_in_mm_M_block,
+     first_chunk_col_in_tiles,
+     first_mm_core_idx) = read_next_tile(
+        start_tile_row_in_mm_M_block, start_chunk_col_in_tiles, start_mm_core_idx,
+        effective_id, effective_chunk_piece_size, effective_chunk_width_in_tiles,
+        config.cfg.mm_block_unit_ht
+    )
     if first_mm_core_idx > last_mm_core_idx:
         return [], []
-    tiles_to_read = how_many_tiles_to_read_formula(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, effective_advance_by_tiles, last_mm_core_idx, effective_chunk_piece_size, effective_chunk_width_in_tiles)
+    tiles_to_read = how_many_tiles_to_read_formula(
+        first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx,
+        effective_advance_by_tiles, last_mm_core_idx,
+        effective_chunk_piece_size, effective_chunk_width_in_tiles
+    )
     while tiles_to_read > 0:
         print(f"--------------------------------")
         print(f"tiles_to_read: {tiles_to_read}")
@@ -277,10 +347,22 @@ def read_tiles_granular_with_direction_based_on_num_workers(
         step_slice_idxs = []
         step_global_idxs = []
         for i in range(tiles_to_read_in_this_step):
-            slice_row, slice_col = coordinates_to_slice_coordinates(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx, chunk_idx, config.cfg.N_block_wt)
-            # read_tile_coords(i, first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx)
+            slice_row, slice_col = coordinates_to_slice_coordinates(
+                first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
+                first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx,
+                chunk_idx, config.cfg.N_block_wt
+            )
+            # read_tile_coords(i, first_tile_row_in_mm_M_block,
+            #                  first_chunk_col_in_tiles, first_mm_core_idx)
             # print(f"slice_row: {slice_row}, slice_col: {slice_col}")
-            first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx = read_next_tile(first_tile_row_in_mm_M_block, first_chunk_col_in_tiles, first_mm_core_idx, effective_advance_by_tiles, effective_chunk_piece_size, effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht)
+            (first_tile_row_in_mm_M_block,
+             first_chunk_col_in_tiles,
+             first_mm_core_idx) = read_next_tile(
+                first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
+                first_mm_core_idx, effective_advance_by_tiles,
+                effective_chunk_piece_size, effective_chunk_width_in_tiles,
+                config.cfg.mm_block_unit_ht
+            )
             slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
             global_tile_idx = slice_coordinates_to_global_tile_index(slice_row, slice_col)
             step_slice_idxs.append(slice_tile_idx)
