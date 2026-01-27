@@ -1,6 +1,11 @@
 import config
 from config import GridConfig, reset_config
-from stride_idx_fns import ReadTilesGranularParams, read_tiles_granular_from_params, read_tiles_granular_from_params_with_direction
+from stride_idx_fns import (
+    ReadTilesGranularParams,
+    read_tiles_granular_from_params,
+    read_tiles_granular_from_params_with_direction,
+    read_tiles_granular_with_direction_based_on_num_workers_from_params,
+)
 
 
 def test_basic_configuration():
@@ -305,6 +310,44 @@ def test_different_block_dimensions():
     # Reference values (list of lists, one per outer while iteration)
     expected_slice_idxs = [[4, 18, 32, 38], [52, 130, 144, 150], [164, 178, 256, 262], [276, 290, 304, 310], [388, 402, 416, 422], [436]]
     expected_global_idxs = [[4, 34, 64, 70], [100, 258, 288, 294], [324, 354, 512, 518], [548, 578, 608, 614], [772, 802, 832, 838], [868]]
+
+    # Assert
+    assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"
+    assert global_idxs == expected_global_idxs, "global_idxs mismatch"
+
+
+def test_direction_based_on_num_workers():
+    """Test read_tiles_granular_with_direction_based_on_num_workers with num_workers=2."""
+    reset_config(GridConfig(
+        mm_block_unit_wt=2,
+        mm_blocks_per_N_block=4,
+        chunk_width=2,
+        mm_block_unit_ht=2,
+        mm_M_unit_blocks_per_core=4,
+        mm_N_blocks_per_slice=2,
+        ring_size=2,
+        N_block_idx=0,
+        M_block_idx=0,
+        slice_actual_idx=0,
+    ))
+
+    params = ReadTilesGranularParams(
+        worker_id=0,
+        start_row_in_mm=0,
+        start_chunk_col=0,
+        start_mm_M_block=0,
+        last_mm_M_block=3,
+        tile_granularity=4,
+        direction=0,
+        num_workers=2
+    )
+
+    # Execute
+    slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers_from_params(params)
+
+    # Reference values (list of lists, one per outer while iteration)
+    expected_slice_idxs = [[0, 16, 128, 144], [256, 272, 384, 400]]
+    expected_global_idxs = [[0, 32, 256, 288], [512, 544, 768, 800]]
 
     # Assert
     assert slice_idxs == expected_slice_idxs, "slice_idxs mismatch"

@@ -16,12 +16,13 @@ def read_next_tile(
     if advance_by_tiles == 0:
         return row_in_mm, chunk_col, mm_M_block
 
-    # TODO: keep slice mm_M_block start row and col -- from there, getting the slice_idx and global_idx is straightforward
+    # TODO: this can be simplified by using the modulo operator
     if advance_by_tiles >= chunk_piece_size:
         move_by_pieces = advance_by_tiles // chunk_piece_size
         advance_by_tiles -= move_by_pieces * chunk_piece_size
         mm_M_block += move_by_pieces
 
+    # TODO: this can be simplified by using the modulo operator
     if advance_by_tiles >= chunk_width_in_tiles:
         move_by_rows = advance_by_tiles // chunk_width_in_tiles
         new_row = row_in_mm + move_by_rows
