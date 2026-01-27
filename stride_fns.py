@@ -1,4 +1,4 @@
-# chunk is a 2D array of 1 x chunk_width_in_mm_units units
+# chunk is a 2D array of mm_unit x chunk_width_in_mm_units units
 # so mm_block_unit_ht by chunk_width_in_mm_units * mm_block_unit_wt tiles
 
 def read_next_tile(
