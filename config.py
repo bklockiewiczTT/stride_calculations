@@ -11,8 +11,8 @@ class GridConfig:
     mm_M_unit_blocks_per_core: int = 4
     mm_N_blocks_per_slice: int = 2
     ring_size: int = 2
-    N_block_idx: int = 0
-    M_block_idx: int = 0
+    N_block_idx: int = 0 # index of the full N-block within the slice
+    M_block_idx: int = 0 # index of the mm M-block within the core
     slice_actual_idx: int = 0
 
     # Derived values (computed in __post_init__)
