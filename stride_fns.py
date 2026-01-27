@@ -1,7 +1,7 @@
 # chunk is a 2D array of mm_unit x chunk_width_in_mm_units units
 # so mm_block_unit_ht by chunk_width_in_mm_units * mm_block_unit_wt tiles
 
-def read_next_tile(
+def get_next_tile_coordinates(
     tile_row_in_mm_M_block: int,
     chunk_col_in_tiles: int,
     mm_core_idx: int,
@@ -90,7 +90,7 @@ def read_tiles_granular(
         first_tile_row_in_mm_M_block,
         first_chunk_col_in_tiles,
         first_mm_core_idx
-    ) = read_next_tile(
+    ) = get_next_tile_coordinates(
         start_tile_row_in_mm_M_block,
         start_chunk_col_in_tiles,
         start_mm_core_idx,
@@ -129,7 +129,7 @@ def read_tiles_granular(
                 first_tile_row_in_mm_M_block,
                 first_chunk_col_in_tiles,
                 first_mm_core_idx
-            ) = read_next_tile(
+            ) = get_next_tile_coordinates(
                 first_tile_row_in_mm_M_block,
                 first_chunk_col_in_tiles,
                 first_mm_core_idx,
