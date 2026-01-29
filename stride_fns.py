@@ -85,8 +85,8 @@ def get_next_tile_coordinates_optimized(
             advance_by_tiles -= move_by_rows * chunk_width_in_tiles
             
             if new_row >= mm_block_unit_ht:
-                mm_core_idx += (new_row // mm_block_unit_ht)
-                tile_row_in_mm_M_block = new_row % mm_block_unit_ht
+                mm_core_idx += 1
+                tile_row_in_mm_M_block = new_row - mm_block_unit_ht
             else:
                 tile_row_in_mm_M_block = new_row
 
