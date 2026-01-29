@@ -182,6 +182,9 @@ def how_many_tiles_to_read_formula(
     chunk_piece_size: int,
     chunk_width_in_tiles: int
 ):
+    if mm_core_idx > last_mm_core_idx:
+        return 0
+
     current_tile_offset = (
         tile_row_in_mm_M_block * chunk_width_in_tiles + chunk_col_in_tiles
     )
