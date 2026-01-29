@@ -17,15 +17,29 @@ class ReadTilesGranularParams:
     direction: int = 1
     num_workers: int = 2
 
-def get_effective_chunk_width_in_tiles(chunk_idx: int) -> int:
+def get_effective_chunk_width_in_tiles_from_config(chunk_idx: int) -> int:
+    """
+    Get the effective chunk width in tiles for a given chunk index.
+    If this is the last chunk in the slice and doesn't fit fully, return the remaining width.
+    Reads config parameters from the global config.
+    """
+    return get_effective_chunk_width_in_tiles(
+        chunk_idx, config.cfg.chunk_width_in_tiles, config.cfg.N_block_wt
+    )
+
+
+def get_effective_chunk_width_in_tiles(
+    chunk_idx: int,
+    chunk_width_in_tiles: int,
+    N_block_wt: int
+) -> int:
     """
     Get the effective chunk width in tiles for a given chunk index.
     If this is the last chunk in the slice and doesn't fit fully, return the remaining width.
     """
-    start_col = chunk_idx * config.cfg.chunk_width_in_tiles
-    remaining_width = config.cfg.N_block_wt - start_col
-    # print(f"remaining width: {remaining_width}")
-    return min(remaining_width, config.cfg.chunk_width_in_tiles)
+    start_col = chunk_idx * chunk_width_in_tiles
+    remaining_width = N_block_wt - start_col
+    return min(remaining_width, chunk_width_in_tiles)
 
 def read_tiles_granular_from_params(
     params: ReadTilesGranularParams
@@ -87,38 +101,91 @@ def coordinates_to_slice_coordinates(
     N_block_idx: int,
     M_block_idx: int,
     chunk_idx: int,
-    N_block_wt: int):
+    N_block_wt: int,
+    tiles_ht_per_core: int,
+    mm_block_unit_ht: int,
+    chunk_width_in_tiles: int
+) -> tuple[int, int]:
     """
     Convert the coordinates to the slice tile index.
     """
-    rows_before_this_core = mm_core_idx * config.cfg.tiles_ht_per_core
-    rows_before_piece = M_block_idx * config.cfg.mm_block_unit_ht
+    rows_before_this_core = mm_core_idx * tiles_ht_per_core
+    rows_before_piece = M_block_idx * mm_block_unit_ht
     slice_row = rows_before_this_core + rows_before_piece + tile_row_in_mm_M_block
     slice_col = (N_block_idx * N_block_wt +
-                 chunk_idx * config.cfg.chunk_width_in_tiles +
+                 chunk_idx * chunk_width_in_tiles +
                  chunk_col_in_tiles)
     return slice_row, slice_col
 
+
+def coordinates_to_slice_coordinates_from_config(
+    tile_row_in_mm_M_block: int,
+    chunk_col_in_tiles: int,
+    mm_core_idx: int,
+    N_block_idx: int,
+    M_block_idx: int,
+    chunk_idx: int,
+    N_block_wt: int):
+    """
+    Convert the coordinates to the slice tile index.
+    Reads config parameters from the global config.
+    """
+    return coordinates_to_slice_coordinates(
+        tile_row_in_mm_M_block, chunk_col_in_tiles, mm_core_idx,
+        N_block_idx, M_block_idx, chunk_idx, N_block_wt,
+        config.cfg.tiles_ht_per_core, config.cfg.mm_block_unit_ht,
+        config.cfg.chunk_width_in_tiles
+    )
+
 def slice_coordinates_to_slice_tile_index(
+    slice_row: int,
+    slice_col: int,
+    slice_Wt: int
+) -> int:
+    """
+    Convert the slice coordinates to the tile index.
+    """
+    tile_index = slice_row * slice_Wt + slice_col
+    return tile_index
+
+
+def slice_coordinates_to_slice_tile_index_from_config(
     slice_row: int,
     slice_col: int):
     """
     Convert the slice coordinates to the tile index.
+    Reads config parameters from the global config.
     """
-    tile_index = slice_row * config.cfg.slice_Wt + slice_col
-    return tile_index
+    return slice_coordinates_to_slice_tile_index(
+        slice_row, slice_col, config.cfg.slice_Wt
+    )
 
 def slice_coordinates_to_global_tile_index(
+    slice_row: int,
+    slice_col: int,
+    slice_actual_idx: int,
+    slice_Wt: int,
+    global_Wt: int
+) -> int:
+    """
+    Convert the slice coordinates to the global tile index.
+    """
+    global_col = slice_col + slice_actual_idx * slice_Wt
+    global_row = slice_row
+    return global_row * global_Wt + global_col
+
+
+def slice_coordinates_to_global_tile_index_from_config(
     slice_row: int,
     slice_col: int):
     """
     Convert the slice coordinates to the global tile index.
+    Reads config parameters from the global config.
     """
-    # print(f"slice_col: {slice_col}, slice_actual_idx: {config.cfg.slice_actual_idx}, "
-    #       f"slice_Wt: {config.cfg.slice_Wt}")
-    global_col = slice_col + config.cfg.slice_actual_idx * config.cfg.slice_Wt
-    global_row = slice_row
-    return global_row * config.cfg.global_Wt + global_col
+    return slice_coordinates_to_global_tile_index(
+        slice_row, slice_col, config.cfg.slice_actual_idx,
+        config.cfg.slice_Wt, config.cfg.global_Wt
+    )
 
 def read_tiles_granular(
     worker_id: int,
@@ -147,7 +214,7 @@ def read_tiles_granular(
     global_idxs = []
 
     # Compute effective chunk dimensions for stride_fns
-    effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles(chunk_idx)
+    effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles_from_config(chunk_idx)
     effective_chunk_piece_size = (config.cfg.mm_block_unit_ht *
                                   effective_chunk_width_in_tiles)
 
@@ -173,7 +240,7 @@ def read_tiles_granular(
         step_slice_idxs = []
         step_global_idxs = []
         for i in range(tiles_to_read_in_this_step):
-            slice_row, slice_col = coordinates_to_slice_coordinates(
+            slice_row, slice_col = coordinates_to_slice_coordinates_from_config(
                 first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
                 first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx,
                 chunk_idx, config.cfg.N_block_wt
@@ -188,8 +255,8 @@ def read_tiles_granular(
                 first_mm_core_idx, advance_by_tiles, effective_chunk_piece_size,
                 effective_chunk_width_in_tiles, config.cfg.mm_block_unit_ht
             )
-            slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
-            global_tile_idx = slice_coordinates_to_global_tile_index(slice_row, slice_col)
+            slice_tile_idx = slice_coordinates_to_slice_tile_index_from_config(slice_row, slice_col)
+            global_tile_idx = slice_coordinates_to_global_tile_index_from_config(slice_row, slice_col)
             step_slice_idxs.append(slice_tile_idx)
             step_global_idxs.append(global_tile_idx)
             print(f"slice_tile_idx: {slice_tile_idx}, global_tile_idx: {global_tile_idx}")
@@ -222,7 +289,7 @@ def read_tiles_granular_with_direction(
         )
 
     # Compute effective chunk dimensions for stride_fns
-    effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles(chunk_idx)
+    effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles_from_config(chunk_idx)
     effective_chunk_piece_size = (config.cfg.mm_block_unit_ht *
                                   effective_chunk_width_in_tiles)
     slice_idxs = []
@@ -259,7 +326,7 @@ def read_tiles_granular_with_direction(
             # print(f"oddity_bool: {oddity_bool}")
             # print(f"direction: {direction}")
             # print(f"reading tile")
-            slice_row, slice_col = coordinates_to_slice_coordinates(
+            slice_row, slice_col = coordinates_to_slice_coordinates_from_config(
                 first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
                 first_mm_core_idx, config.cfg.N_block_idx, config.cfg.M_block_idx,
                 chunk_idx, config.cfg.N_block_wt
@@ -275,8 +342,8 @@ def read_tiles_granular_with_direction(
             )
 
             if oddity_bool == (direction == 0):
-                slice_tile_idx = slice_coordinates_to_slice_tile_index(slice_row, slice_col)
-                global_tile_idx = slice_coordinates_to_global_tile_index(slice_row, slice_col)
+                slice_tile_idx = slice_coordinates_to_slice_tile_index_from_config(slice_row, slice_col)
+                global_tile_idx = slice_coordinates_to_global_tile_index_from_config(slice_row, slice_col)
                 # print(f"slice_row: {slice_row}, slice_col: {slice_col}") 
                 print(f"slice_tile_idx: {slice_tile_idx}, global_tile_idx: {global_tile_idx}")
                 tiles_read += 1
@@ -325,75 +392,6 @@ def read_tiles_granular_with_direction_based_on_num_workers_from_config(
     )
 
 
-def get_effective_chunk_width_in_tiles_configless(
-    chunk_idx: int,
-    chunk_width_in_tiles: int,
-    N_block_wt: int
-) -> int:
-    """
-    Get the effective chunk width in tiles for a given chunk index.
-    If this is the last chunk in the slice and doesn't fit fully, return the remaining width.
-    Configless version that takes all config parameters as inputs.
-    """
-    start_col = chunk_idx * chunk_width_in_tiles
-    remaining_width = N_block_wt - start_col
-    return min(remaining_width, chunk_width_in_tiles)
-
-
-def coordinates_to_slice_coordinates_configless(
-    tile_row_in_mm_M_block: int,
-    chunk_col_in_tiles: int,
-    mm_core_idx: int,
-    N_block_idx: int,
-    M_block_idx: int,
-    chunk_idx: int,
-    N_block_wt: int,
-    tiles_ht_per_core: int,
-    mm_block_unit_ht: int,
-    chunk_width_in_tiles: int
-) -> tuple[int, int]:
-    """
-    Convert the coordinates to the slice tile index.
-    Configless version that takes all config parameters as inputs.
-    """
-    rows_before_this_core = mm_core_idx * tiles_ht_per_core
-    rows_before_piece = M_block_idx * mm_block_unit_ht
-    slice_row = rows_before_this_core + rows_before_piece + tile_row_in_mm_M_block
-    slice_col = (N_block_idx * N_block_wt +
-                 chunk_idx * chunk_width_in_tiles +
-                 chunk_col_in_tiles)
-    return slice_row, slice_col
-
-
-def slice_coordinates_to_slice_tile_index_configless(
-    slice_row: int,
-    slice_col: int,
-    slice_Wt: int
-) -> int:
-    """
-    Convert the slice coordinates to the tile index.
-    Configless version that takes all config parameters as inputs.
-    """
-    tile_index = slice_row * slice_Wt + slice_col
-    return tile_index
-
-
-def slice_coordinates_to_global_tile_index_configless(
-    slice_row: int,
-    slice_col: int,
-    slice_actual_idx: int,
-    slice_Wt: int,
-    global_Wt: int
-) -> int:
-    """
-    Convert the slice coordinates to the global tile index.
-    Configless version that takes all config parameters as inputs.
-    """
-    global_col = slice_col + slice_actual_idx * slice_Wt
-    global_row = slice_row
-    return global_row * global_Wt + global_col
-
-
 def read_tiles_granular_with_direction_based_on_num_workers(
     worker_id: int,
     start_tile_row_in_mm_M_block: int,
@@ -439,7 +437,7 @@ def read_tiles_granular_with_direction_based_on_num_workers(
     effective_advance_by_tiles = 2 * num_workers
 
     # Compute effective chunk dimensions for stride_fns
-    effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles_configless(
+    effective_chunk_width_in_tiles = get_effective_chunk_width_in_tiles(
         chunk_idx, chunk_width_in_tiles, N_block_wt
     )
     effective_chunk_piece_size = mm_block_unit_ht * effective_chunk_width_in_tiles
@@ -466,7 +464,7 @@ def read_tiles_granular_with_direction_based_on_num_workers(
         step_slice_idxs = []
         step_global_idxs = []
         for i in range(tiles_to_read_in_this_step):
-            slice_row, slice_col = coordinates_to_slice_coordinates_configless(
+            slice_row, slice_col = coordinates_to_slice_coordinates(
                 first_tile_row_in_mm_M_block, first_chunk_col_in_tiles,
                 first_mm_core_idx, N_block_idx, M_block_idx,
                 chunk_idx, N_block_wt, tiles_ht_per_core,
@@ -480,10 +478,10 @@ def read_tiles_granular_with_direction_based_on_num_workers(
                 effective_chunk_piece_size, effective_chunk_width_in_tiles,
                 mm_block_unit_ht
             )
-            slice_tile_idx = slice_coordinates_to_slice_tile_index_configless(
+            slice_tile_idx = slice_coordinates_to_slice_tile_index(
                 slice_row, slice_col, slice_Wt
             )
-            global_tile_idx = slice_coordinates_to_global_tile_index_configless(
+            global_tile_idx = slice_coordinates_to_global_tile_index(
                 slice_row, slice_col, slice_actual_idx, slice_Wt, global_Wt
             )
             step_slice_idxs.append(slice_tile_idx)
