@@ -13,6 +13,13 @@ def get_next_tile_coordinates(
     """
     Read the next tile from the chunk.
     """
+    assert chunk_piece_size == mm_block_unit_ht * chunk_width_in_tiles
+    assert tile_row_in_mm_M_block < mm_block_unit_ht
+    assert chunk_col_in_tiles < chunk_width_in_tiles
+    assert mm_core_idx >= 0
+    assert tile_row_in_mm_M_block >= 0
+    assert advance_by_tiles >= 0
+
     if advance_by_tiles < 0:
         raise ValueError("advance_by_tiles must be greater than 0")
     if advance_by_tiles == 0:
@@ -42,6 +49,129 @@ def get_next_tile_coordinates(
         new_col = new_col % chunk_width_in_tiles
 
     return tile_row_in_mm_M_block, new_col, mm_core_idx
+
+def get_next_tile_coordinates_optimized(
+    tile_row_in_mm_M_block: int,
+    chunk_col_in_tiles: int,
+    mm_core_idx: int,
+    advance_by_tiles: int,
+    chunk_piece_size: int,
+    chunk_width_in_tiles: int,
+    mm_block_unit_ht: int
+) -> tuple[int, int, int]:
+    """
+    Read the next tile from the chunk.
+    
+    Optimized to avoid divisions when advance_by_tiles < chunk_width_in_tiles.
+    """
+    assert chunk_piece_size == mm_block_unit_ht * chunk_width_in_tiles
+    assert tile_row_in_mm_M_block < mm_block_unit_ht
+    assert chunk_col_in_tiles < chunk_width_in_tiles
+    assert mm_core_idx >= 0
+    assert tile_row_in_mm_M_block >= 0
+    assert advance_by_tiles >= 0
+
+    # 1. Check for "Piece" Jump - SKIPS EXPENSIVE MATH when advance is small
+    if advance_by_tiles >= chunk_width_in_tiles:
+        if advance_by_tiles >= chunk_piece_size:
+            move_by_pieces = advance_by_tiles // chunk_piece_size
+            advance_by_tiles -= move_by_pieces * chunk_piece_size
+            mm_core_idx += move_by_pieces
+
+        # 2. Check for "Row" Jump
+        if advance_by_tiles >= chunk_width_in_tiles:
+            move_by_rows = advance_by_tiles // chunk_width_in_tiles
+            new_row = tile_row_in_mm_M_block + move_by_rows
+            advance_by_tiles -= move_by_rows * chunk_width_in_tiles
+            
+            if new_row >= mm_block_unit_ht:
+                mm_core_idx += (new_row // mm_block_unit_ht)
+                tile_row_in_mm_M_block = new_row % mm_block_unit_ht
+            else:
+                tile_row_in_mm_M_block = new_row
+
+    # 3. Handle Remaining Columns - FAST ADDITION
+    new_col = chunk_col_in_tiles + advance_by_tiles
+    
+    if new_col >= chunk_width_in_tiles:
+        tile_row_in_mm_M_block += 1
+        new_col -= chunk_width_in_tiles
+        if tile_row_in_mm_M_block >= mm_block_unit_ht:
+            mm_core_idx += 1
+            tile_row_in_mm_M_block = 0
+
+    return tile_row_in_mm_M_block, new_col, mm_core_idx
+
+def get_next_tile_coordinates_2(
+    tile_row_in_mm_M_block: int,
+    chunk_col_in_tiles: int,
+    mm_core_idx: int,
+    advance_by_tiles: int,
+    chunk_width_in_tiles: int,
+    mm_block_unit_ht: int
+):
+    """
+    Read the next tile from the chunk.
+    """
+    if advance_by_tiles < 0:
+        raise ValueError("advance_by_tiles must be greater than 0")
+    if advance_by_tiles == 0:
+        return tile_row_in_mm_M_block, chunk_col_in_tiles, mm_core_idx
+    
+    assert tile_row_in_mm_M_block < mm_block_unit_ht
+    assert chunk_col_in_tiles < chunk_width_in_tiles
+    assert mm_core_idx >= 0
+    assert tile_row_in_mm_M_block >= 0
+    assert advance_by_tiles >= 0
+
+    chunk_piece_size = mm_block_unit_ht * chunk_width_in_tiles
+
+    move_by_pieces = advance_by_tiles // chunk_piece_size
+    advance_by_tiles -= move_by_pieces * chunk_piece_size
+    mm_core_idx += move_by_pieces
+
+    move_by_rows = advance_by_tiles // chunk_width_in_tiles
+    new_row = tile_row_in_mm_M_block + move_by_rows
+    advance_by_tiles -= move_by_rows * chunk_width_in_tiles
+    mm_core_idx += (new_row // mm_block_unit_ht)
+    tile_row_in_mm_M_block = new_row % mm_block_unit_ht
+
+    new_col = chunk_col_in_tiles + advance_by_tiles
+    tile_row_in_mm_M_block += new_col // chunk_width_in_tiles
+    mm_core_idx += (tile_row_in_mm_M_block // mm_block_unit_ht)
+    tile_row_in_mm_M_block = tile_row_in_mm_M_block % mm_block_unit_ht
+    new_col = new_col % chunk_width_in_tiles
+
+    return tile_row_in_mm_M_block, new_col, mm_core_idx
+
+def get_next_tile_coordinates_flat(
+    tile_row_in_mm_M_block: int,
+    chunk_col_in_tiles: int,
+    mm_core_idx: int,
+    advance_by_tiles: int,
+    chunk_width_in_tiles: int,
+    mm_block_unit_ht: int
+):
+    """
+    Read the next tile from the chunk using a flattened index approach.
+    """
+    if advance_by_tiles < 0:
+        raise ValueError("advance_by_tiles must be greater than 0")
+
+    chunk_piece_size = mm_block_unit_ht * chunk_width_in_tiles
+    current_chunk_index = (
+        (mm_core_idx * chunk_piece_size) + 
+        (tile_row_in_mm_M_block * chunk_width_in_tiles) + 
+        chunk_col_in_tiles
+    )
+    target_chunk_index = current_chunk_index + advance_by_tiles
+    mm_core_idx = target_chunk_index // chunk_piece_size
+    remaining_tiles = target_chunk_index % chunk_piece_size
+    
+    tile_row_in_mm_M_block = remaining_tiles // chunk_width_in_tiles
+    chunk_col_in_tiles = remaining_tiles % chunk_width_in_tiles
+
+    return tile_row_in_mm_M_block, chunk_col_in_tiles, mm_core_idx
 
 def how_many_tiles_to_read_formula(
     tile_row_in_mm_M_block: int,
@@ -90,7 +220,7 @@ def read_tiles_granular(
         first_tile_row_in_mm_M_block,
         first_chunk_col_in_tiles,
         first_mm_core_idx
-    ) = get_next_tile_coordinates(
+    ) = get_next_tile_coordinates_optimized(
         start_tile_row_in_mm_M_block,
         start_chunk_col_in_tiles,
         start_mm_core_idx,
@@ -129,7 +259,7 @@ def read_tiles_granular(
                 first_tile_row_in_mm_M_block,
                 first_chunk_col_in_tiles,
                 first_mm_core_idx
-            ) = get_next_tile_coordinates(
+            ) = get_next_tile_coordinates_optimized(
                 first_tile_row_in_mm_M_block,
                 first_chunk_col_in_tiles,
                 first_mm_core_idx,
