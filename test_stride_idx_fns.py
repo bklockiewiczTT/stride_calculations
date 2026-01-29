@@ -5,6 +5,7 @@ from stride_idx_fns import (
     read_tiles_granular_from_params,
     read_tiles_granular_from_params_with_direction,
     read_tiles_granular_with_direction_based_on_num_workers_from_params,
+    read_tiles_granular_with_direction_based_on_num_workers,
 )
 
 
@@ -318,32 +319,46 @@ def test_different_block_dimensions():
 
 def test_direction_based_on_num_workers():
     """Test read_tiles_granular_with_direction_based_on_num_workers with num_workers=2."""
-    reset_config(GridConfig(
-        mm_block_unit_wt=2,
-        mm_blocks_per_N_block=4,
-        chunk_width_in_mm_units=2,
-        mm_block_unit_ht=2,
-        mm_M_unit_blocks_per_core=4,
-        mm_N_blocks_per_slice=2,
-        ring_size=2,
-        N_block_idx=0,
-        M_block_idx=0,
-        slice_actual_idx=0,
-    ))
+    # Config values - no global config needed
+    mm_block_unit_wt = 2
+    mm_blocks_per_N_block = 4
+    chunk_width_in_mm_units = 2
+    mm_block_unit_ht = 2
+    mm_M_unit_blocks_per_core = 4
+    mm_N_blocks_per_slice = 2
+    ring_size = 2
+    N_block_idx = 0
+    M_block_idx = 0
+    slice_actual_idx = 0
 
-    params = ReadTilesGranularParams(
+    # Derived values
+    N_block_wt = mm_block_unit_wt * mm_blocks_per_N_block  # 8
+    slice_Wt = N_block_wt * mm_N_blocks_per_slice  # 16
+    tiles_ht_per_core = mm_block_unit_ht * mm_M_unit_blocks_per_core  # 8
+    chunk_width_in_tiles = chunk_width_in_mm_units * mm_block_unit_wt  # 4
+    global_Wt = slice_Wt * ring_size  # 32
+
+    # Execute using explicit-parameter version
+    slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers(
         worker_id=0,
         start_tile_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
         start_mm_core_idx=0,
         last_mm_core_idx=3,
         tile_granularity=4,
+        chunk_idx=0,
         direction=0,
-        num_workers=2
+        num_workers=2,
+        mm_block_unit_ht=mm_block_unit_ht,
+        chunk_width_in_tiles=chunk_width_in_tiles,
+        N_block_wt=N_block_wt,
+        N_block_idx=N_block_idx,
+        M_block_idx=M_block_idx,
+        tiles_ht_per_core=tiles_ht_per_core,
+        slice_Wt=slice_Wt,
+        slice_actual_idx=slice_actual_idx,
+        global_Wt=global_Wt,
     )
-
-    # Execute
-    slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers_from_params(params)
 
     # Reference values (list of lists, one per outer while iteration)
     expected_slice_idxs = [[0, 16, 128, 144], [256, 272, 384, 400]]
@@ -356,33 +371,46 @@ def test_direction_based_on_num_workers():
 
 def test_direction_based_on_num_workers_3():
     """Test read_tiles_granular_with_direction_based_on_num_workers with num_workers=3 and different block dimensions."""
-    reset_config(GridConfig(
-        mm_block_unit_wt=4,
-        mm_blocks_per_N_block=2,
-        chunk_width_in_mm_units=2,
-        mm_block_unit_ht=4,
-        mm_M_unit_blocks_per_core=2,
-        mm_N_blocks_per_slice=2,
-        ring_size=2,
-        N_block_idx=0,
-        M_block_idx=0,
-        slice_actual_idx=0,
-    ))
+    # Config values - no global config needed
+    mm_block_unit_wt = 4
+    mm_blocks_per_N_block = 2
+    chunk_width_in_mm_units = 2
+    mm_block_unit_ht = 4
+    mm_M_unit_blocks_per_core = 2
+    mm_N_blocks_per_slice = 2
+    ring_size = 2
+    N_block_idx = 0
+    M_block_idx = 0
+    slice_actual_idx = 0
 
-    params = ReadTilesGranularParams(
+    # Derived values
+    N_block_wt = mm_block_unit_wt * mm_blocks_per_N_block  # 8
+    slice_Wt = N_block_wt * mm_N_blocks_per_slice  # 16
+    tiles_ht_per_core = mm_block_unit_ht * mm_M_unit_blocks_per_core  # 8
+    chunk_width_in_tiles = chunk_width_in_mm_units * mm_block_unit_wt  # 8
+    global_Wt = slice_Wt * ring_size  # 32
+
+    # Execute using explicit-parameter version
+    slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers(
         worker_id=1,
         start_tile_row_in_mm_M_block=0,
         start_chunk_col_in_tiles=0,
         start_mm_core_idx=0,
         last_mm_core_idx=3,
         tile_granularity=4,
-        direction=1,
         chunk_idx=0,
-        num_workers=3
+        direction=1,
+        num_workers=3,
+        mm_block_unit_ht=mm_block_unit_ht,
+        chunk_width_in_tiles=chunk_width_in_tiles,
+        N_block_wt=N_block_wt,
+        N_block_idx=N_block_idx,
+        M_block_idx=M_block_idx,
+        tiles_ht_per_core=tiles_ht_per_core,
+        slice_Wt=slice_Wt,
+        slice_actual_idx=slice_actual_idx,
+        global_Wt=global_Wt,
     )
-
-    # Execute
-    slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers_from_params(params)
 
     # Reference values (list of lists, one per outer while iteration)
     expected_slice_idxs = [[4, 18, 32, 38], [52, 130, 144, 150], [164, 178, 256, 262], [276, 290, 304, 310], [388, 402, 416, 422], [436]]
