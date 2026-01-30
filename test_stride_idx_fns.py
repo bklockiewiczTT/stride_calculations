@@ -481,7 +481,8 @@ def test_get_iteration_history():
     assert iteration_history == expected_iteration_history, "iteration_history mismatch"
 
 
-def test_get_iteration_history_ring_size_8():
+def test_get_iteration_history_ring_size_8_direction_0():
+    """Test get_iteration_history with ring_size=8, direction=0 (forward), worker_id=0."""
     """Test get_iteration_history with ring_size=8, small blocks, and single worker read per chunk."""
     iteration_history = get_iteration_history(
         batch_size=1,
@@ -519,6 +520,49 @@ def test_get_iteration_history_ring_size_8():
         ((0, 1, 0, 0), [[4]], [[44]]),
         ((0, 1, 0, 0), [[4]], [[46]]),
         ((0, 1, 0, 0), [[4]], [[32]]),
+    ]
+
+    assert iteration_history == expected_iteration_history, "iteration_history mismatch"
+
+
+def test_get_iteration_history_ring_size_8_direction_1():
+    """Test get_iteration_history with ring_size=8, direction=1 (backward), my_chip_id=2, worker_id=1."""
+    iteration_history = get_iteration_history(
+        batch_size=1,
+        M_blocks_per_core=2,
+        chunks_per_mm_N_block=1,
+        my_chip_id=2,
+        direction=1,
+        ring_size=8,
+        mm_N_blocks_per_slice=1,
+        worker_id=1,
+        last_mm_core_idx=0,
+        tile_granularity=8,
+        num_workers=2,
+        mm_block_unit_ht=2,
+        chunk_width=1,
+        N_block_wt=2,
+        tiles_ht_per_core=4,
+        slice_Wt=2,
+    )
+
+    expected_iteration_history = [
+        ((0, 0, 0, 0), [[3]], [[19]]),
+        ((0, 0, 0, 0), [[3]], [[17]]),
+        ((0, 0, 0, 0), [[3]], [[31]]),
+        ((0, 0, 0, 0), [[3]], [[29]]),
+        ((0, 0, 0, 0), [[3]], [[27]]),
+        ((0, 0, 0, 0), [[3]], [[25]]),
+        ((0, 0, 0, 0), [[3]], [[23]]),
+        ((0, 0, 0, 0), [[3]], [[21]]),
+        ((0, 1, 0, 0), [[7]], [[51]]),
+        ((0, 1, 0, 0), [[7]], [[49]]),
+        ((0, 1, 0, 0), [[7]], [[63]]),
+        ((0, 1, 0, 0), [[7]], [[61]]),
+        ((0, 1, 0, 0), [[7]], [[59]]),
+        ((0, 1, 0, 0), [[7]], [[57]]),
+        ((0, 1, 0, 0), [[7]], [[55]]),
+        ((0, 1, 0, 0), [[7]], [[53]]),
     ]
 
     assert iteration_history == expected_iteration_history, "iteration_history mismatch"

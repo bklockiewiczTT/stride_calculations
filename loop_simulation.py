@@ -57,7 +57,7 @@ def get_iteration_history(
                         print(f"chunk_piece_idx: {chunk_piece_idx} started")
                         iteration_id = (b, m_block_iter, chunk_idx, chunk_piece_idx)
                         slice_idxs, global_idxs = read_tiles_granular_with_direction_based_on_num_workers(
-                            worker_id=effective_worker_id,
+                            worker_id=worker_id,
                             start_tile_row_in_mm_M_block=first_tile_row_in_mm_M_block,
                             start_chunk_col_in_tiles=first_chunk_col_in_tiles,
                             start_mm_core_idx=first_mm_core_idx,
@@ -155,11 +155,11 @@ if __name__ == "__main__":
     batch_size = 1
     M_blocks_per_core = 2
     chunks_per_mm_N_block = 1
-    my_chip_id = 0
-    direction = 0
+    my_chip_id = 2
+    direction = 1
     ring_size = 8
     mm_N_blocks_per_slice = 1
-    worker_id = 0
+    worker_id = 1
     last_mm_core_idx = 0
     tile_granularity = 8
     num_workers = 2
