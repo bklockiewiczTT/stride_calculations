@@ -479,3 +479,46 @@ def test_get_iteration_history():
     ]
 
     assert iteration_history == expected_iteration_history, "iteration_history mismatch"
+
+
+def test_get_iteration_history_ring_size_8():
+    """Test get_iteration_history with ring_size=8, small blocks, and single worker read per chunk."""
+    iteration_history = get_iteration_history(
+        batch_size=1,
+        M_blocks_per_core=2,
+        chunks_per_mm_N_block=1,
+        my_chip_id=0,
+        direction=0,
+        ring_size=8,
+        mm_N_blocks_per_slice=1,
+        worker_id=0,
+        last_mm_core_idx=0,
+        tile_granularity=8,
+        num_workers=2,
+        mm_block_unit_ht=2,
+        chunk_width=1,
+        N_block_wt=2,
+        tiles_ht_per_core=4,
+        slice_Wt=2,
+    )
+
+    expected_iteration_history = [
+        ((0, 0, 0, 0), [[0]], [[2]]),
+        ((0, 0, 0, 0), [[0]], [[4]]),
+        ((0, 0, 0, 0), [[0]], [[6]]),
+        ((0, 0, 0, 0), [[0]], [[8]]),
+        ((0, 0, 0, 0), [[0]], [[10]]),
+        ((0, 0, 0, 0), [[0]], [[12]]),
+        ((0, 0, 0, 0), [[0]], [[14]]),
+        ((0, 0, 0, 0), [[0]], [[0]]),
+        ((0, 1, 0, 0), [[4]], [[34]]),
+        ((0, 1, 0, 0), [[4]], [[36]]),
+        ((0, 1, 0, 0), [[4]], [[38]]),
+        ((0, 1, 0, 0), [[4]], [[40]]),
+        ((0, 1, 0, 0), [[4]], [[42]]),
+        ((0, 1, 0, 0), [[4]], [[44]]),
+        ((0, 1, 0, 0), [[4]], [[46]]),
+        ((0, 1, 0, 0), [[4]], [[32]]),
+    ]
+
+    assert iteration_history == expected_iteration_history, "iteration_history mismatch"
