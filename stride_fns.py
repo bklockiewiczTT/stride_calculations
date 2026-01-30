@@ -62,7 +62,7 @@ def get_next_tile_coordinates_optimized(
     """
     Read the next tile from the chunk.
     
-    Optimized to avoid divisions when advance_by_tiles < chunk_width_in_tiles.
+    Optimized to avoid modulo operations.
     """
     assert chunk_piece_size == mm_block_unit_ht * chunk_width_in_tiles
     assert tile_row_in_mm_M_block < mm_block_unit_ht
@@ -71,28 +71,25 @@ def get_next_tile_coordinates_optimized(
     assert tile_row_in_mm_M_block >= 0
     assert advance_by_tiles >= 0
 
-    # 1. Check for "Piece" Jump - SKIPS EXPENSIVE MATH when advance is small
+    # 1. Handle Piece Jumps
+    if advance_by_tiles >= chunk_piece_size:
+        move_by_pieces = advance_by_tiles // chunk_piece_size
+        advance_by_tiles -= move_by_pieces * chunk_piece_size
+        mm_core_idx += move_by_pieces
+
+    # 2. Handle Row Jumps
     if advance_by_tiles >= chunk_width_in_tiles:
-        if advance_by_tiles >= chunk_piece_size:
-            move_by_pieces = advance_by_tiles // chunk_piece_size
-            advance_by_tiles -= move_by_pieces * chunk_piece_size
-            mm_core_idx += move_by_pieces
+        move_by_rows = advance_by_tiles // chunk_width_in_tiles
+        new_row = tile_row_in_mm_M_block + move_by_rows
+        advance_by_tiles -= move_by_rows * chunk_width_in_tiles
+        if new_row >= mm_block_unit_ht:
+            mm_core_idx += 1
+            tile_row_in_mm_M_block = new_row - mm_block_unit_ht
+        else:
+            tile_row_in_mm_M_block = new_row
 
-        # 2. Check for "Row" Jump
-        if advance_by_tiles >= chunk_width_in_tiles:
-            move_by_rows = advance_by_tiles // chunk_width_in_tiles
-            new_row = tile_row_in_mm_M_block + move_by_rows
-            advance_by_tiles -= move_by_rows * chunk_width_in_tiles
-            
-            if new_row >= mm_block_unit_ht:
-                mm_core_idx += 1
-                tile_row_in_mm_M_block = new_row - mm_block_unit_ht
-            else:
-                tile_row_in_mm_M_block = new_row
-
-    # 3. Handle Remaining Columns - FAST ADDITION
+    # 3. Handle Remaining Columns
     new_col = chunk_col_in_tiles + advance_by_tiles
-    
     if new_col >= chunk_width_in_tiles:
         tile_row_in_mm_M_block += 1
         new_col -= chunk_width_in_tiles
