@@ -91,6 +91,7 @@ def get_iteration_history(
 
 
 if __name__ == "__main__":
+    # MINIMAL EXAMPLE 1
     # # Input parameters
     # batch_size = 1
     # M_blocks_per_core = 4
@@ -151,25 +152,86 @@ if __name__ == "__main__":
 
     # print(f"iteration_history: {iteration_history}")
 
+    # TOY EXAMPLE 1
+    # Input parameters
+    # batch_size = 1
+    # M_blocks_per_core = 2
+    # chunks_per_mm_N_block = 1
+    # my_chip_id = 1
+    # direction = 0
+    # ring_size = 8
+    # mm_N_blocks_per_slice = 1
+    # worker_id = 0
+    # last_mm_core_idx = 0
+    # tile_granularity = 8
+    # num_workers = 2
+    # mm_block_unit_ht = 2
+    # chunk_width = 1
+    # N_block_wt = 2
+    # tiles_ht_per_core = 4
+    # slice_Wt = 2
+
+    # # Derived values for printing
+    # chunk_width_in_tiles = chunk_width * mm_block_unit_ht
+    # global_Wt = ring_size * slice_Wt
+    # effective_worker_id = worker_id + direction * num_workers
+    # effective_advance_by_tiles = 2 * num_workers
+
+    # print(f"batch_size: {batch_size}")
+    # print(f"M_blocks_per_core: {M_blocks_per_core}")
+    # print(f"chunks_per_mm_N_block: {chunks_per_mm_N_block}")
+    # print(f"my_chip_id: {my_chip_id}")
+    # print(f"direction: {direction}")
+    # print(f"ring_size: {ring_size}")
+    # print(f"mm_N_blocks_per_slice: {mm_N_blocks_per_slice}")
+    # print(f"worker_id: {worker_id}")
+    # print(f"last_mm_core_idx: {last_mm_core_idx}")
+    # print(f"tile_granularity: {tile_granularity}")
+    # print(f"num_workers: {num_workers}")
+    # print(f"effective_worker_id: {effective_worker_id}")
+    # print(f"effective_advance_by_tiles: {effective_advance_by_tiles}")
+
+    # # Get iteration history using the function
+    # iteration_history = get_iteration_history(
+    #     batch_size=batch_size,
+    #     M_blocks_per_core=M_blocks_per_core,
+    #     chunks_per_mm_N_block=chunks_per_mm_N_block,
+    #     my_chip_id=my_chip_id,
+    #     direction=direction,
+    #     ring_size=ring_size,
+    #     mm_N_blocks_per_slice=mm_N_blocks_per_slice,
+    #     worker_id=worker_id,
+    #     last_mm_core_idx=last_mm_core_idx,
+    #     tile_granularity=tile_granularity,
+    #     num_workers=num_workers,
+    #     mm_block_unit_ht=mm_block_unit_ht,
+    #     chunk_width=chunk_width,
+    #     N_block_wt=N_block_wt,
+    #     tiles_ht_per_core=tiles_ht_per_core,
+    #     slice_Wt=slice_Wt,
+    # )
+
+    # TOY EXAMPLE 2
+
     # Input parameters
     batch_size = 1
-    M_blocks_per_core = 2
+    M_blocks_per_core = 1
     chunks_per_mm_N_block = 1
-    my_chip_id = 2
+    my_chip_id = 7
     direction = 1
     ring_size = 8
     mm_N_blocks_per_slice = 1
-    worker_id = 1
+    worker_id = 0
     last_mm_core_idx = 0
     tile_granularity = 8
     num_workers = 2
     mm_block_unit_ht = 2
-    chunk_width = 1
-    N_block_wt = 2
-    tiles_ht_per_core = 4
-    slice_Wt = 2
+    chunk_width = 2
+    N_block_wt = 4
+    tiles_ht_per_core = 2
+    slice_Wt = 4
 
-    # Derived values for printing
+    # # Derived values for printing
     chunk_width_in_tiles = chunk_width * mm_block_unit_ht
     global_Wt = ring_size * slice_Wt
     effective_worker_id = worker_id + direction * num_workers

@@ -566,3 +566,38 @@ def test_get_iteration_history_ring_size_8_direction_1():
     ]
 
     assert iteration_history == expected_iteration_history, "iteration_history mismatch"
+
+
+def test_get_iteration_history_toy_example_2():
+    """Test get_iteration_history with TOY EXAMPLE 2 from loop_simulation.py (my_chip_id=7, direction=1)."""
+    iteration_history = get_iteration_history(
+        batch_size=1,
+        M_blocks_per_core=1,
+        chunks_per_mm_N_block=1,
+        my_chip_id=7,
+        direction=1,
+        ring_size=8,
+        mm_N_blocks_per_slice=1,
+        worker_id=0,
+        last_mm_core_idx=0,
+        tile_granularity=8,
+        num_workers=2,
+        mm_block_unit_ht=2,
+        chunk_width=2,
+        N_block_wt=4,
+        tiles_ht_per_core=2,
+        slice_Wt=4,
+    )
+
+    expected_iteration_history = [
+        ((0, 0, 0, 0), [[2, 6]], [[26, 58]]),
+        ((0, 0, 0, 0), [[2, 6]], [[22, 54]]),
+        ((0, 0, 0, 0), [[2, 6]], [[18, 50]]),
+        ((0, 0, 0, 0), [[2, 6]], [[14, 46]]),
+        ((0, 0, 0, 0), [[2, 6]], [[10, 42]]),
+        ((0, 0, 0, 0), [[2, 6]], [[6, 38]]),
+        ((0, 0, 0, 0), [[2, 6]], [[2, 34]]),
+        ((0, 0, 0, 0), [[2, 6]], [[30, 62]]),
+    ]
+
+    assert iteration_history == expected_iteration_history, "iteration_history mismatch"
