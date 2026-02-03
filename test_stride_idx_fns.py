@@ -601,3 +601,46 @@ def test_get_iteration_history_toy_example_2():
     ]
 
     assert iteration_history == expected_iteration_history, "iteration_history mismatch"
+
+
+def test_get_iteration_history_current_example():
+    """Test get_iteration_history with current example from loop_simulation.py __main__ (my_chip_id=1, direction=0, M_blocks_per_core=2)."""
+    iteration_history = get_iteration_history(
+        batch_size=1,
+        M_blocks_per_core=2,
+        chunks_per_mm_N_block=1,
+        my_chip_id=1,
+        direction=0,
+        ring_size=8,
+        mm_N_blocks_per_slice=1,
+        worker_id=0,
+        last_mm_core_idx=0,
+        tile_granularity=8,
+        num_workers=2,
+        mm_block_unit_ht=2,
+        chunk_width=2,
+        N_block_wt=4,
+        tiles_ht_per_core=4,
+        slice_Wt=4,
+    )
+
+    expected_iteration_history = [
+        ((0, 0, 0, 0), [[0, 4]], [[8, 40]]),
+        ((0, 0, 0, 0), [[0, 4]], [[12, 44]]),
+        ((0, 0, 0, 0), [[0, 4]], [[16, 48]]),
+        ((0, 0, 0, 0), [[0, 4]], [[20, 52]]),
+        ((0, 0, 0, 0), [[0, 4]], [[24, 56]]),
+        ((0, 0, 0, 0), [[0, 4]], [[28, 60]]),
+        ((0, 0, 0, 0), [[0, 4]], [[0, 32]]),
+        ((0, 0, 0, 0), [[0, 4]], [[4, 36]]),
+        ((0, 1, 0, 0), [[8, 12]], [[72, 104]]),
+        ((0, 1, 0, 0), [[8, 12]], [[76, 108]]),
+        ((0, 1, 0, 0), [[8, 12]], [[80, 112]]),
+        ((0, 1, 0, 0), [[8, 12]], [[84, 116]]),
+        ((0, 1, 0, 0), [[8, 12]], [[88, 120]]),
+        ((0, 1, 0, 0), [[8, 12]], [[92, 124]]),
+        ((0, 1, 0, 0), [[8, 12]], [[64, 96]]),
+        ((0, 1, 0, 0), [[8, 12]], [[68, 100]]),
+    ]
+
+    assert iteration_history == expected_iteration_history, "iteration_history mismatch"
